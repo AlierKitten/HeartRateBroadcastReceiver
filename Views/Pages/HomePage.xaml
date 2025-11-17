@@ -6,8 +6,9 @@
     xmlns:local="clr-namespace:HeartRateBroadcastReceiver.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:pages="clr-namespace:HeartRateBroadcastReceiver.ViewModels.Pages"
     Title="HomePage"
-    d:DataContext="{d:DesignInstance local:HomePage,
+    d:DataContext="{d:DesignInstance Type=pages:HomePageViewModel,
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -45,6 +46,7 @@
 
                 <StackPanel Grid.Row="1" Margin="15,0,15,15">
                     <ComboBox
+                        x:Name="DeviceComboBox"
                         Margin="0,0,0,10"
                         IsReadOnly="True"
                         SelectedIndex="0">
@@ -52,10 +54,19 @@
                         <ComboBoxItem Content="HUAWEI" />
                     </ComboBox>
 
-                    <ui:Button Margin="0,0,0,10" Content="连接设备" />
-                    <ui:Button Content="断开连接" />
+                    <ui:Button 
+                        x:Name="ConnectButton"
+                        Margin="0,0,0,10" 
+                        Content="连接设备" 
+                        Click="ConnectButton_Click"/>
+                    <ui:Button 
+                        x:Name="DisconnectButton"
+                        Content="断开连接" 
+                        Click="DisconnectButton_Click"/>
 
-                    <TextBlock Margin="0,20,0,0" Text="连接状态: 未连接" />
+                    <TextBlock 
+                        Margin="0,20,0,0" 
+                        Text="{Binding ConnectionStatus, StringFormat='连接状态: {0}'}" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -86,10 +97,11 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
                     <TextBlock
+                        x:Name="HeartRateTextBlock"
                         HorizontalAlignment="Center"
                         FontSize="48"
                         FontWeight="Bold"
-                        Text="---" />
+                        Text="{Binding HeartRate}" />
                     <TextBlock
                         Margin="0,10,0,0"
                         HorizontalAlignment="Center"
