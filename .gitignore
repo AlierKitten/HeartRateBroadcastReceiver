@@ -1,0 +1,121 @@
+﻿# Windows 系统
+Thumbs.db
+Desktop.ini
+
+# macOS 系统
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux 系统
+*~
+
+# IDE 和编辑器
+.vs/
+.vscode/
+.idea/
+*.iml
+.project
+.classpath
+.cproject
+nbproject/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+Properties/PublishProfiles/*.pubxml
+Properties/PublishProfiles/*.pubxml.user
+
+# 编译文件
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+*.a
+*.lib
+*.la
+*.lo
+*.class
+*.jar
+*.war
+*.ear
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+*.gz
+*.tgz
+
+# Ruby
+*.gem
+*.rbc
+.bundle/
+log/
+tmp/
+*.bak
+
+# PHP
+*.log
+*.cache
+*.tmp
+vendor/
+
+# Rust
+target/
+
+# .NET / C#
+bin/
+obj/
+
+# Android
+.gradle/
+local.properties
+
+# Xcode
+*.xcuserstate
+
+# Unity
+Library/
+Temp/
+Obj/
+Build/
+Builds/
+UserSettings/
+
+# Unreal Engine
+Saved/
+DerivedDataCache/
+Intermediate/
+
+# Vagrant
+.vagrant/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# For all files that may contain sensitive or private information
+*.env
+.env.*
+*.key
+*.pem
+*.crt
+*.pfx
