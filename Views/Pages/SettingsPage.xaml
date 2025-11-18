@@ -28,5 +28,11 @@
             Text="About" />
         <TextBlock Margin="0,12,0,0" Text="HeartRateBroadcastReceiver" />
         <TextBlock Margin="0,0,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
+        <TextBlock Margin="0,12,0,0">
+            <Hyperlink NavigateUri="https://github.com/AlierKitten" RequestNavigate="Hyperlink_RequestNavigate">
+                GitHub
+            </Hyperlink>
+        </TextBlock>
+
     </StackPanel>
 </Page>
