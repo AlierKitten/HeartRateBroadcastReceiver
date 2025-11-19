@@ -13,12 +13,12 @@ public partial class DataPageViewModel : ObservableObject
 {
     private readonly ObservableCollection<ObservablePoint> _heartRateData;
     private DateTime _startTime;
-    
+
     public DataPageViewModel()
     {
         _heartRateData = new ObservableCollection<ObservablePoint>();
         _startTime = DateTime.Now;
-        
+
         Series = new ISeries[]
         {
             new LineSeries<ObservablePoint>
@@ -26,9 +26,13 @@ public partial class DataPageViewModel : ObservableObject
                 Values = _heartRateData,
                 Name = "心率 (BPM)",
                 Fill = null,
-                Stroke = new SolidColorPaint(new SKColor(255, 0, 0), 2),
-                GeometrySize = 8,
-                DataPadding = new LiveChartsCore.Drawing.LvcPoint(0, 1)
+                Stroke = new SolidColorPaint(new SKColor(255, 82, 161), 3),
+                GeometryFill = new SolidColorPaint(new SKColor(255, 255, 255)),
+                GeometryStroke = new SolidColorPaint(new SKColor(0, 0, 0), 2),
+                GeometrySize = 10,
+                DataPadding = new LiveChartsCore.Drawing.LvcPoint(0, 1),
+                LineSmoothness = 0.5,
+                IsHoverable = true
             }
         };
 
@@ -38,7 +42,10 @@ public partial class DataPageViewModel : ObservableObject
             {
                 Labeler = value => TimeSpan.FromSeconds(value).ToString(@"mm\:ss"),
                 UnitWidth = 1,
-                MinStep = 1
+                MinStep = 1,
+                SeparatorsPaint = new SolidColorPaint(new SKColor(220, 220, 220)),
+                TextSize = 14,
+                LabelsRotation = 0
             }
         };
 
@@ -47,7 +54,9 @@ public partial class DataPageViewModel : ObservableObject
             new Axis
             {
                 MinLimit = 0,
-                MaxLimit = 200
+                MaxLimit = 220,
+                SeparatorsPaint = new SolidColorPaint(new SKColor(220, 220, 220)),
+                TextSize = 14
             }
         };
     }
