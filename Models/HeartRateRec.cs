@@ -25,6 +25,9 @@ namespace HeartRateBroadcast
         
         // 存储已连接的设备
         private readonly ConcurrentDictionary<ulong, BluetoothLEDevice> connectedDevices = new();
+        
+        // 存储已订阅通知的设备地址
+        private readonly ConcurrentDictionary<ulong, GattCharacteristic> subscribedCharacteristics = new();
 
         public HeartRateMonitor(string deviceName, Action<int> heartRateCallback, Action<string> connectionCallback = null)
         {
@@ -55,8 +58,8 @@ namespace HeartRateBroadcast
                 {
                     LogAndCallback($"发现目标设备广播: {args.Advertisement.LocalName}, RSSI: {args.RawSignalStrengthInDBm}");
                     
-                    // 如果已经处理过该设备，则跳过
-                    if (connectedDevices.ContainsKey(args.BluetoothAddress))
+                    // 检查是否已经订阅了该设备的心率通知
+                    if (subscribedCharacteristics.ContainsKey(args.BluetoothAddress))
                         return;
                     
                     // 获取蓝牙设备
@@ -93,6 +96,8 @@ namespace HeartRateBroadcast
                     
                     if (status == GattCommunicationStatus.Success)
                     {
+                        // 记录已订阅通知的特征
+                        subscribedCharacteristics.TryAdd(device.BluetoothAddress, hrCharacteristic);
                         LogAndCallback($"已成功订阅 {device.Name} 的心率数据通知");
                     }
                     else
@@ -138,6 +143,8 @@ namespace HeartRateBroadcast
         public void StartListening()
         {
             LogAndCallback("开始监听BLE广播...");
+            // 清除之前的订阅记录，允许重新订阅
+            subscribedCharacteristics.Clear();
             advertisementWatcher.Start();
         }
         
@@ -146,6 +153,20 @@ namespace HeartRateBroadcast
         {
             LogAndCallback("停止监听BLE广播");
             advertisementWatcher.Stop();
+            
+            // 清理已订阅的特征通知
+            foreach (var kvp in subscribedCharacteristics)
+            {
+                var characteristic = kvp.Value;
+                if (characteristic != null)
+                {
+                    // 尝试取消订阅通知
+                    _ = characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                        GattClientCharacteristicConfigurationDescriptorValue.None);
+                    characteristic.ValueChanged -= HeartRateValueChanged;
+                }
+            }
+            subscribedCharacteristics.Clear();
             
             // 清理已连接的设备
             foreach (var device in connectedDevices.Values)
