@@ -1,10 +1,8 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
-using System;
 using System.Collections.ObjectModel;
 
 namespace HeartRateBroadcastReceiver.ViewModels.Pages;
@@ -53,8 +51,6 @@ public partial class DataPageViewModel : ObservableObject
         {
             new Axis
             {
-                MinLimit = 0,
-                MaxLimit = 220,
                 SeparatorsPaint = new SolidColorPaint(new SKColor(220, 220, 220)),
                 TextSize = 14
             }
@@ -73,16 +69,48 @@ public partial class DataPageViewModel : ObservableObject
         var elapsed = (DateTime.Now - _startTime).TotalSeconds;
         _heartRateData.Add(new ObservablePoint(elapsed, heartRate));
 
-        // 保持最多60个数据点（大约1分钟的数据）
+        // 保持最多60个数据点
         while (_heartRateData.Count > 60)
         {
             _heartRateData.RemoveAt(0);
         }
+
+        // 动态调整Y轴范围
+        UpdateYAxisRange();
     }
 
     public void ClearHeartRateData()
     {
         _heartRateData.Clear();
         _startTime = DateTime.Now;
+
+        // 重置Y轴范围到默认状态
+        YAxes[0].MinLimit = 0;
+        YAxes[0].MaxLimit = 220;
+    }
+
+    private void UpdateYAxisRange()
+    {
+        if (_heartRateData.Count == 0) return;
+
+        // 获取当前所有数据点的Y值
+        var yValues = _heartRateData
+            .Where(p => p.Y.HasValue)
+            .Select(p => p.Y.Value)
+            .ToList();
+
+        if (yValues.Count == 0) return;
+
+        // 计算最小值和最大值
+        double min = yValues.Min();
+        double max = yValues.Max();
+
+        // 添加一些边距，使图形不紧贴边缘
+        double margin = (max - min) * 0.1; // 10%的边距
+        if (margin == 0) margin = 5; // 如果所有值相同，添加固定边距
+
+        // 确保最小值不低于0
+        YAxes[0].MinLimit = Math.Max(0, min - margin);
+        YAxes[0].MaxLimit = max + margin;
     }
 }
