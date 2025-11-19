@@ -15,6 +15,12 @@ public partial class MainWindowViewModel : ObservableObject
             Content = "首页",
             Icon = new SymbolIcon { Symbol = SymbolRegular.Home24 },
             TargetPageType = typeof(Views.Pages.HomePage)
+        },
+        new NavigationViewItem()
+        {
+            Content = "数据",
+            Icon = new SymbolIcon { Symbol = SymbolRegular.DataTrending24 },
+            TargetPageType = typeof(Views.Pages.DataPage)
         }
     };
 

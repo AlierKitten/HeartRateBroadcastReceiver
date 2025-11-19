@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Reflection;
 using System.Windows.Threading;
 using HeartRateBroadcastReceiver.Services;
@@ -46,6 +46,9 @@ public partial class App
             services.AddSingleton<MainWindowViewModel>();
 
             services.AddSingleton<HomePage>();
+            services.AddSingleton<HomePageViewModel>();
+            services.AddSingleton<DataPage>();
+            services.AddSingleton<DataPageViewModel>();
             services.AddSingleton<SettingsPage>();
             services.AddSingleton<SettingsViewModel>();
         }).Build();

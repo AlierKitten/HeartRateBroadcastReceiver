@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Wpf.Ui.Abstractions.Controls;
+using HeartRateBroadcastReceiver.Views.Pages;
 
 namespace HeartRateBroadcastReceiver.ViewModels.Pages;
 
@@ -27,6 +27,9 @@ public class HomePageViewModel : INotifyPropertyChanged
         {
             _heartRate = value;
             OnPropertyChanged();
+
+            // 更新图表数据
+            UpdateChartData();
         }
     }
 
@@ -45,5 +48,18 @@ public class HomePageViewModel : INotifyPropertyChanged
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private void UpdateChartData()
+    {
+        // 如果心率是有效数字，则将其添加到图表数据中
+        if (int.TryParse(_heartRate, out int heartRateValue))
+        {
+            var dataPage = App.Services.GetService(typeof(DataPage)) as DataPage;
+            if (dataPage?.DataContext is DataPageViewModel dataPageViewModel)
+            {
+                dataPageViewModel.AddHeartRateData(heartRateValue);
+            }
+        }
     }
 }
