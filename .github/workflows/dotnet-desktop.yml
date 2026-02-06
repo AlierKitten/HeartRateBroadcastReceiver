@@ -16,8 +16,6 @@ on:
   push:
     tags:
       - '*.*.*'
-  release:
-    types: [created]
 
 jobs:
 
