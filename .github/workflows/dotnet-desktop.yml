@@ -40,6 +40,22 @@ jobs:
       with:
         fetch-depth: 0
 
+    # Set installer version
+    - name: Set installer version
+      id: set-version
+      run: |
+        $tag = "${{ github.ref_name }}"
+        Write-Host "Original tag: $tag"
+        if ($tag -match '^v(.*)$') { $tag = $matches[1] }
+        Write-Host "Tag after removing v: $tag"
+        $versionParts = $tag.Split('.')
+        Write-Host "Version parts: $versionParts"
+        while ($versionParts.Count -lt 4) { $versionParts += "0" }
+        $version = $versionParts[0..3] -join '.'
+        Write-Host "Final version: $version"
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+
     # Install the .NET Core workload
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
@@ -82,16 +98,9 @@ jobs:
     - name: Create Inno Setup installer
       if: matrix.configuration == 'Release'
       run: |
-        # Remove 'v' prefix if present and ensure version format is valid
-        $tag = "${{ github.ref_name }}"
-        if ($tag -match '^v(.*)$') { $tag = $matches[1] }
-        # Ensure version has at least 4 parts (e.g., 1.0.1 -> 1.0.1.0)
-        $versionParts = $tag.Split('.')
-        while ($versionParts.Count -lt 4) { $versionParts += "0" }
-        $version = $versionParts[0..3] -join '.'
+        $version = "${{ steps.set-version.outputs.version }}"
         Write-Host "Building installer with version: $version"
-        # Need to quote the value for Inno Setup preprocessor
-        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion="$version" setup.iss
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=$version setup.iss
       shell: pwsh
 
     # List installer files

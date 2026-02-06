@@ -1,4 +1,7 @@
-#define MyAppVersion "1.0.0.0"
+#ifndef MyAppVersion
+  #error "MyAppVersion must be defined via command line parameter /DMyAppVersion=x.x.x.x"
+#endif
+#pragma message "MyAppVersion: {#MyAppVersion}"
 #define MyAppName "HeartRateBroadcastReceiver"
 #define MyAppPublisher "Alierkitten"
 #define MyAppCopyright "Copyright © 2025 Alierkitten"
