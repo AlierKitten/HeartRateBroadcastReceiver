@@ -15,8 +15,12 @@ name: .NET Core Desktop
 on:
   push:
     branches: [ "master" ]
+    tags:
+      - '*.*.*'
   pull_request:
     branches: [ "master" ]
+  release:
+    types: [created]
 
 jobs:
 
@@ -70,9 +74,16 @@ jobs:
 
     # Publish the application
     - name: Publish the application
-      run: dotnet publish $env:Solution_Name -c $env:Configuration -o ./publish
+      run: dotnet publish $env:Solution_Name -c $env:Configuration -o ./publish --self-contained true -r win-x64
       env:
         Configuration: ${{ matrix.configuration }}
+
+    # Create Inno Setup installer
+    - name: Create Inno Setup installer
+      if: matrix.configuration == 'Release'
+      run: |
+        '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DGITHUB_REF_NAME=${{ github.ref_name }} setup.iss'
+      shell: pwsh
 
     # Upload build artifacts
     - name: Upload build artifacts
@@ -80,3 +91,47 @@ jobs:
       with:
         name: HeartRateBroadcastReceiver-${{ matrix.configuration }}
         path: ./publish
+
+    # Upload installer artifact
+    - name: Upload installer artifact
+      if: matrix.configuration == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: HeartRateBroadcastReceiver-installer
+        path: ./installer/*.exe
+
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+
+    # Download artifacts
+    - name: Download Release artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: HeartRateBroadcastReceiver-installer
+        path: ./installer
+
+    # Upload installer to Release
+    - name: Upload installer to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./installer/HeartRateBroadcastReceiver_setup_${{ github.ref_name }}.exe
+        asset_name: HeartRateBroadcastReceiver_setup_${{ github.ref_name }}.exe
+        asset_content_type: application/x-msdownload
