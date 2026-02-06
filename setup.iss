@@ -1,4 +1,4 @@
-#define MyAppVersion "{#Env('GITHUB_REF_NAME')}"
+#define MyAppVersion "1.0.0.0"
 #define MyAppName "HeartRateBroadcastReceiver"
 #define MyAppPublisher "Alierkitten"
 #define MyAppCopyright "Copyright © 2025 Alierkitten"
