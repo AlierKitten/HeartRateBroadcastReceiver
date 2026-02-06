@@ -140,9 +140,74 @@ jobs:
         name: HeartRateBroadcastReceiver-installer
         path: ./installer
 
-    # List downloaded files
-    - name: List downloaded files
-      run: ls -la ./installer
+    # List downloaded files and get installer filename
+    - name: Get installer filename
+      id: installer-filename
+      run: |
+        # Find the .exe file in installer directory
+        EXE_FILE=$(ls ./installer/*.exe 2>/dev/null | head -1)
+        if [ -n "$EXE_FILE" ]; then
+          FILENAME=$(basename "$EXE_FILE")
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "Found installer: $FILENAME"
+        else
+          echo "filename=HeartRateBroadcastReceiver_setup_${{ github.ref_name }}.exe" >> $GITHUB_OUTPUT
+          echo "Warning: No .exe file found in installer directory"
+        fi
+
+    # Generate changelog
+    - name: Generate changelog
+      id: changelog
+      run: |
+        CURRENT_TAG="${{ github.ref_name }}"
+        echo "Current tag: $CURRENT_TAG"
+        
+        # Get all tags sorted by version
+        git fetch --tags
+        ALL_TAGS=$(git tag --sort=-v:refname)
+        
+        # Find previous tag
+        PREVIOUS_TAG=""
+        FOUND_CURRENT=false
+        for tag in $ALL_TAGS; do
+          if [ "$tag" = "$CURRENT_TAG" ]; then
+            FOUND_CURRENT=true
+          elif [ "$FOUND_CURRENT" = true ]; then
+            PREVIOUS_TAG="$tag"
+            break
+          fi
+        done
+        
+        echo "Previous tag: $PREVIOUS_TAG"
+        
+        # Generate changelog
+        CHANGELOG=""
+        if [ -n "$PREVIOUS_TAG" ]; then
+          CHANGELOG=$(git log --oneline --pretty=format:"- %s" "$PREVIOUS_TAG".."$CURRENT_TAG" 2>/dev/null || echo "")
+        else
+          # First tag, get all commits
+          CHANGELOG=$(git log --oneline --pretty=format:"- %s" 2>/dev/null || echo "")
+        fi
+        
+        if [ -z "$CHANGELOG" ]; then
+          CHANGELOG="- Initial release"
+        fi
+        
+        # Escape for GitHub Actions output
+        CHANGELOG="${CHANGELOG//'%'/'%25'}"
+        CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+        CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+        
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    # Get current timestamp in UTC-8
+    - name: Get build timestamp
+      id: timestamp
+      run: |
+        TIMESTAMP=$(TZ='UTC-8' date '+%Y-%m-%d %H:%M:%S UTC-8')
+        echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
     # Create or update Release and upload installer
     - name: Create Release and upload installer
@@ -155,3 +220,13 @@ jobs:
         draft: false
         prerelease: false
         files: ./installer/*.exe
+        body: |
+          ## 📋 Change Log
+          ${{ steps.changelog.outputs.changelog }}
+
+          ## 📥 Downloads
+          **Windows**
+          - [${{ steps.installer-filename.outputs.filename }}](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.installer-filename.outputs.filename }})
+
+          ---
+          *🔄 Auto built with GitHub Actions at ${{ steps.timestamp.outputs.timestamp }}*
