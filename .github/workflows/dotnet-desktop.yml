@@ -82,7 +82,14 @@ jobs:
     - name: Create Inno Setup installer
       if: matrix.configuration == 'Release'
       run: |
-        $env:GITHUB_REF_NAME="${{ github.ref_name }}"
+        # Remove 'v' prefix if present and ensure version format is valid
+        $tag = "${{ github.ref_name }}"
+        if ($tag -match '^v(.*)$') { $tag = $matches[1] }
+        # Ensure version has at least 3 parts (e.g., 1.0.1 -> 1.0.1.0)
+        $versionParts = $tag.Split('.')
+        while ($versionParts.Count -lt 4) { $versionParts += "0" }
+        $version = $versionParts[0..3] -join '.'
+        $env:GITHUB_REF_NAME=$version
         & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DGITHUB_REF_NAME=$env:GITHUB_REF_NAME setup.iss
       shell: pwsh
 
