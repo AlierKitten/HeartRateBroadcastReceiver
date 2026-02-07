@@ -205,11 +205,11 @@ jobs:
         echo "$CHANGELOG" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
 
-    # Get current timestamp in UTC-8
+    # Get current timestamp in GMT+8
     - name: Get build timestamp
       id: timestamp
       run: |
-        TIMESTAMP=$(TZ='UTC-8' date '+%Y-%m-%d %H:%M:%S UTC-8')
+        TIMESTAMP=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S GMT+8')
         echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
     # Create or update Release and upload installer
